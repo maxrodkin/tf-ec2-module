@@ -7,3 +7,8 @@ data "aws_ami" "example" {
   }
 }
 
+data "aws_availability_zones" "available" {}
+
+output "availability_zones"{
+  value = data.aws_availability_zones.available
+}

@@ -14,11 +14,11 @@ variable "subnet-cidr-d" {default = null}
 variable "subnets_count" {}
 
 locals {
-  subnets_list= {
-    "a" = var.subnet-cidr-a
-    "b" = var.subnet-cidr-b
-    "c" = var.subnet-cidr-c
-    "d" = var.subnet-cidr-d
-  }
+  subnets_list= [
+    {zone = "a" , cidr = var.subnet-cidr-a},
+    {zone = "b" , cidr = var.subnet-cidr-b},
+    {zone = "c" , cidr = var.subnet-cidr-c},
+    {zone = "d" , cidr = var.subnet-cidr-d}
+  ]
 }
 

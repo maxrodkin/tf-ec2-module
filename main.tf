@@ -10,11 +10,11 @@ resource "aws_vpc" "vpc" {
 }
 
 resource "aws_subnet" "subnets" {
-    for_each = local.subnets_list
+    count = var.subnets_count
 
     vpc_id            = aws_vpc.vpc.id
-    cidr_block        = each.value
-    availability_zone = "${var.region}${each.key}"
+    cidr_block        = local.subnets_list[count.index].cidr
+    availability_zone = "${var.region}${local.subnets_list[count.index].zone}"
 }
 
 /*
@@ -52,9 +52,9 @@ resource "aws_route" "subnet-route" {
 }
 
 resource "aws_route_table_association" "subnet-all-route-table-associations" {
-  for_each = aws_subnet.subnets
+  count = length(aws_subnet.subnets)
 
-  subnet_id      = each.value.id
+  subnet_id      = aws_subnet.subnets[count.index].id
   route_table_id = aws_route_table.subnet-route-table.id
 }
 /*
@@ -75,12 +75,13 @@ resource "aws_route_table_association" "subnet-c-route-table-association" {
 */
 
 resource "aws_instance" "instance" {
+  count = 2
   #  ami                         = "ami-cdbfa4ab"
   ami                         = data.aws_ami.example.id
   instance_type               = "t2.small"
   vpc_security_group_ids      = [aws_security_group.security-group.id]
 #  subnet_id                   = aws_subnet.subnet-a.id
-  subnet_id = aws_subnet.subnets["a"].id
+  subnet_id = aws_subnet.subnets[0].id
   associate_public_ip_address = true
   user_data                   = <<EOF
 #!/bin/sh
@@ -120,5 +121,5 @@ resource "aws_security_group" "security-group" {
 }
 
 output "nginx_domain" {
-  value = aws_instance.instance.public_dns
+  value = aws_instance.instance.*.public_dns
 }
